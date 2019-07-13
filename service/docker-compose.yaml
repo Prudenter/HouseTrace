@@ -1,0 +1,283 @@
+version: '2'
+
+networks:
+  ZFW_suyuan:
+
+services:
+  orderer.itcast.cn:
+    image: hyperledger/fabric-orderer:1.2.1 #duke1
+    container_name: orderer.itcast.cn
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=debug # 日志级别
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0 # orderer节点监听的地址
+      - ORDERER_GENERAL_LISTENPORT=7050 # orderer 默认监听7050，监听的端口号可以修改
+      - ORDERER_GENERAL_GENESISPROFILE=Orderer
+      - ORDERER_GENERAL_GENESISMETHOD=file #创世块的来源，file表示来自于文件
+      # 指定创世块文件的路径
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=itcast.cn # Orderer组织的ID[Organizations -> Orderer -> ID]
+      # 当前节点的 MSP 账号路径
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true # 通信的时候是否使用 TLS 加密
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key # 私钥文件
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt #证书文件
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt] #根证书文件
+
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - ./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ./crypto-config/ordererOrganizations/itcast.cn/orderers/orderer.itcast.cn/msp:/var/hyperledger/orderer/msp
+      - ./crypto-config/ordererOrganizations/itcast.cn/orderers/orderer.itcast.cn/tls:/var/hyperledger/orderer/tls
+    ports:
+      - 7050:7050
+    networks:
+      default:
+        aliases:
+          - orderer.itcast.cn
+
+  # ofgj
+  peer0.ofgj.itcast.cn:
+    image: hyperledger/fabric-peer:1.2.1 #duke2
+    container_name: peer0.ofgj.itcast.cn
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer0.ofgj.itcast.cn # peer 节点的名字
+      - CORE_PEER_ADDRESS=peer0.ofgj.itcast.cn:7051 #当前 peer 节点的地址信息
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      # 为了别其他节点感知到，如果不设置，其他节点不知道该节点的存在
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.ofgj.itcast.cn:7051
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true # leader 节点自动选举机制
+      - CORE_PEER_GOSSIP_ORGLEADER=false # 当前节点是不是 leader 节点，结果应由选举得出所以此处给出 false
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      # 当前组织的ID[Organizations -> ID]
+      - CORE_PEER_LOCALMSPID=ofgj.itcast.cn
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0.ofgj.itcast.cn
+      - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/ofgj.itcast.cn/peers/peer0.ofgj.itcast.cn/msp:/var/hyperledger/msp
+      - ./crypto-config/peerOrganizations/ofgj.itcast.cn/peers/peer0.ofgj.itcast.cn/tls:/var/hyperledger/tls
+    ports:
+      - 7051:7051
+      - 7053:7053
+    depends_on:
+      - orderer.itcast.cn
+    links:
+      - orderer.itcast.cn
+    networks:
+      default:
+        aliases:
+          - peer0.ofgj.itcast.cn
+
+  peer1.ofgj.itcast.cn:
+    image: hyperledger/fabric-peer:1.2.1 #duke3
+    container_name: peer1.ofgj.itcast.cn
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_LOGGING_LEVEL=DEBUG
+      # 用户配置文件
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
+      - CORE_PEER_ID=peer1.ofgj.itcast.cn
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      - CORE_PEER_ADDRESS=peer1.ofgj.itcast.cn:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.ofgj.itcast.cn:7051
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      - CORE_PEER_LOCALMSPID=ofgj.itcast.cn
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
+      - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer1.ofgj.itcast.cn
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/ofgj.itcast.cn/peers/peer1.ofgj.itcast.cn/msp:/var/hyperledger/msp
+      - ./crypto-config/peerOrganizations/ofgj.itcast.cn/peers/peer1.ofgj.itcast.cn/tls:/var/hyperledger/tls
+    ports:
+      - 8051:7051
+      - 8053:7053
+    depends_on:
+      - orderer.itcast.cn
+    links:
+      - orderer.itcast.cn
+    networks:
+      default:
+        aliases:
+          - peer1.ofgj.itcast.cn
+
+  # otgj
+  peer0.otgj.itcast.cn:
+    image: hyperledger/fabric-peer:1.2.1 #duke4
+    container_name: peer0.otgj.itcast.cn
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
+      - CORE_PEER_ID=peer0.otgj.itcast.cn
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      - CORE_PEER_ADDRESS=peer0.otgj.itcast.cn:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.otgj.itcast.cn:7051
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      - CORE_PEER_LOCALMSPID=otgj.itcast.cn
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
+      - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0.otgj.itcast.cn
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/otgj.itcast.cn/peers/peer0.otgj.itcast.cn/msp:/var/hyperledger/msp
+      - ./crypto-config/peerOrganizations/otgj.itcast.cn/peers/peer0.otgj.itcast.cn/tls:/var/hyperledger/tls
+    ports:
+      - 9051:7051
+      - 9053:7053
+    depends_on:
+      - orderer.itcast.cn
+    links:
+      - orderer.itcast.cn
+    networks:
+      default:
+        aliases:
+          - peer0.otgj.itcast.cn
+
+  peer1.otgj.itcast.cn:
+    image: hyperledger/fabric-peer:latest
+    container_name: peer1.otgj.itcast.cn
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
+      - CORE_PEER_ID=peer1.otgj.itcast.cn
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      - CORE_PEER_ADDRESS=peer1.otgj.itcast.cn:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.otgj.itcast.cn:7051
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      - CORE_PEER_LOCALMSPID=otgj.itcast.cn
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
+      - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer1.otgj.itcast.cn
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/otgj.itcast.cn/peers/peer1.otgj.itcast.cn/msp:/var/hyperledger/msp
+      - ./crypto-config/peerOrganizations/otgj.itcast.cn/peers/peer1.otgj.itcast.cn/tls:/var/hyperledger/tls
+    ports:
+      - 10051:7051
+      - 10053:7053
+    depends_on:
+      - orderer.itcast.cn
+    links:
+      - orderer.itcast.cn
+    networks:
+      default:
+        aliases:
+          - peer1.otgj.itcast.cn
+
+  # ozfpt
+  peer0.ozfpt.itcast.cn:
+    image: hyperledger/fabric-peer:1.2.1 #duke5
+    container_name: peer0.ozfpt.itcast.cn
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
+      - CORE_PEER_ID=peer0.ozfpt.itcast.cn
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      - CORE_PEER_ADDRESS=peer0.ozfpt.itcast.cn:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.ozfpt.itcast.cn:7051
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      - CORE_PEER_LOCALMSPID=ozfpt.itcast.cn
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
+      - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0.ozfpt.itcast.cn
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/ozfpt.itcast.cn/peers/peer0.ozfpt.itcast.cn/msp:/var/hyperledger/msp
+      - ./crypto-config/peerOrganizations/ozfpt.itcast.cn/peers/peer0.ozfpt.itcast.cn/tls:/var/hyperledger/tls
+    ports:
+      - 11051:7051
+      - 11053:7053
+    depends_on:
+      - orderer.itcast.cn
+    links:
+      - orderer.itcast.cn
+    networks:
+      default:
+        aliases:
+          - peer0.ozfpt.itcast.cn
+
+  peer1.ozfpt.itcast.cn:
+    image: hyperledger/fabric-peer:1.2.1 #duke6
+    container_name: peer1.ozfpt.itcast.cn
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
+      - CORE_PEER_ID=peer1.ozfpt.itcast.cn
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      - CORE_PEER_ADDRESS=peer1.ozfpt.itcast.cn:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.ozfpt.itcast.cn:7051
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      - CORE_PEER_LOCALMSPID=ozfpt.itcast.cn
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
+      - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer1.ozfpt.itcast.cn
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/ozfpt.itcast.cn/peers/peer1.ozfpt.itcast.cn/msp:/var/hyperledger/msp
+      - ./crypto-config/peerOrganizations/ozfpt.itcast.cn/peers/peer1.ozfpt.itcast.cn/tls:/var/hyperledger/tls
+    ports:
+      - 12051:7051
+      - 12053:7053
+    depends_on:
+      - orderer.itcast.cn
+    links:
+      - orderer.itcast.cn
+    networks:
+      default:
+        aliases:
+          - peer1.ozfpt.itcast.cn

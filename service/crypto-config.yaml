@@ -1,0 +1,33 @@
+
+OrdererOrgs:
+  - Name: Orderer
+    Domain: itcast.cn
+
+    Specs:
+      - Hostname: orderer
+
+PeerOrgs:
+  - Name: Ofgj
+    Domain: ofgj.itcast.cn
+    EnableNodeOUs: false
+
+    Template:
+      Count: 2
+    Users:
+      Count: 1
+
+  - Name: Otgj
+    Domain: otgj.itcast.cn
+    EnableNodeOUs: false
+    Template:
+      Count: 2
+    Users:
+      Count: 1
+
+  - Name: Ozfpt
+    Domain: ozfpt.itcast.cn
+    EnableNodeOUs: false
+    Template:
+      Count: 2
+    Users:
+      Count: 1

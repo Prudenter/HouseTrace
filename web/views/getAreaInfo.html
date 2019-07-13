@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="../static/css/detail.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/business_search.css" />
+    <script src="https://ajax.lug.ustc.edu.cn/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://ajax.lug.ustc.edu.cn/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+</head>
+<body>
+
+<div class="form-wrapper">
+    <form id="business_search" action="area_search" method="get">
+            <input type="text" id="search" name="rentingId" placeholder="rentingID">
+            <input type="submit" value="搜索" id="submit" >
+    </form>
+</div>
+
+<table cellspacing="0" id="transit_source">
+    <tr>
+        <th>社区编号</th>
+        <th>社区地址</th>
+        <th>基础网络编号</th>
+        <th>社区民警姓名</th>
+        <th>社区民警工号</th>
+    </tr>
+
+    <tr ng-repeat="transit in transit_source">
+        <td>{{.areaId}}</td>
+        <td>{{.areaAddr}}</td>
+        <td>{{.comm_net}}</td>
+        <td>{{.areaPoliceName}}</td>
+        <td>{{.areaPoliceNum}}</td>
+
+    </tr>
+</table>
+</body>
+<script type="text/javascript" src="../static/js/app.js"> </script>
+</html>

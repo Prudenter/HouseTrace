@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="../static/css/detail.css"/>
+    <link rel="stylesheet" type="text/css" href="../static/css/search.css"/>
+    <script src="https://ajax.lug.ustc.edu.cn/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://ajax.lug.ustc.edu.cn/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+</head>
+
+<body>
+
+<form id="search_key" action="orderer_search" method="get">
+    <div class="form-wrapper">
+        <input type="text" id = "search" name="rentingId" placeholder="Please input RentingId">
+        <input type="submit" value="搜索" id="submit">
+    </div>
+</form>
+<table>
+{{/*表头*/}}
+    <tr>
+        <th>电子合同Hash</th>
+        <th>订单编号</th>
+        <th>承租人信息</th>
+        <th>租金</th>
+        <th>开始日期</th>
+        <th>结束日期</th>
+        <th>备注</th>
+    </tr>
+{{/*数据*/}}
+    <tr>
+
+        <td>{{.docHash0}}</td>
+        <td>{{.orderId0}}</td>
+        <td>{{.renterID0}}</td>
+        <td>{{.rentMoney0}}</td>
+        <td>{{.beginDate0}}</td>
+        <td>{{.endData0}}</td>
+        <td>{{.note0}}</td>
+    </tr>
+
+    <tr>
+        <td>{{.docHash1}}</td>
+        <td>{{.orderId1}}</td>
+        <td>{{.renterID1}}</td>
+        <td>{{.rentMoney1}}</td>
+        <td>{{.beginDate1}}</td>
+        <td>{{.endData1}}</td>
+        <td>{{.note1}}</td>
+    </tr>
+
+    <tr>
+        <td>{{.docHash2}}</td>
+        <td>{{.orderId2}}</td>
+        <td>{{.renterID2}}</td>
+        <td>{{.rentMoney2}}</td>
+        <td>{{.beginDate2}}</td>
+        <td>{{.endData2}}</td>
+        <td>{{.note2}}</td>
+    </tr>
+</table>
+</body>
+
+</html>

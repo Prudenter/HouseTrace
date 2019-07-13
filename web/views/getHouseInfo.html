@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="../static/css/detail.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/search.css" />
+    <script src="https://ajax.lug.ustc.edu.cn/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://ajax.lug.ustc.edu.cn/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+</head>
+<body >
+
+<div class="form-wrapper">
+    <form id="part_search_key" action="house_search" mothod="get">
+            <input type="text" id=search name="rentingId" placeholder="Please input RentingId">
+            <input type="submit" value="搜索" id="submit">
+    </form>
+</div>
+
+<table cellspacing="0" id="part_source">
+    <tr>
+        <th>房产证编号</th>
+        <th>房主姓名</th>
+        <th>登记日期</th>
+        <th>住房面积</th>
+        <th>房屋设计用途</th>
+        <th>是否抵押</th>
+    </tr>
+    <tr >
+        <td>{{.houseId}}</td>
+        <td>{{.houseOwner}}</td>
+        <td>{{.regDate}}</td>
+        <td>{{.houseArea}}</td>
+        <td>{{.houseUsed}}</td>
+        <td>{{.isMortgage}}</td>
+    </tr>
+
+</table>
+</body>
+<script type="text/javascript" src="../static/js/app.js"> </script>
+</html>
